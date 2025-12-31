@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Backend'in çalıştığı adres (Server.js'de 5000 portunu ayarlamıştık)
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://finans-takip-backend.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
