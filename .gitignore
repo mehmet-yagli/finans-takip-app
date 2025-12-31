@@ -1,0 +1,13 @@
+# Gereksiz kütüphane dosyaları (Çok yer kaplar)
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# GİZLİ ŞİFRELER (Burası çok önemli, asla gitmemeli)
+.env
+backend/.env
+
+# İşletim sistemi dosyaları
+.DS_Store
+dist/
+build/
