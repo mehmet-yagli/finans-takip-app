@@ -1,15 +1,14 @@
 import { useState, useContext, useEffect, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { FiLogOut, FiPieChart, FiDollarSign, FiTrendingUp, FiTrendingDown, FiPlus, FiTrash } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import { FiDollarSign, FiTrendingUp, FiTrendingDown, FiPlus, FiTrash } from 'react-icons/fi'; // LogOut ve PieChart'ı sildik çünkü Sidebar'da
 import { toast } from 'react-hot-toast';
 import AddTransactionModal from '../components/AddTransactionModal';
-import ExpenseChart from '../components/ExpenseChart'; // <-- 1. YENİ EKLENEN IMPORT
+import ExpenseChart from '../components/ExpenseChart';
+import Sidebar from '../components/Sidebar'; // 👈 YENİ: Sidebar'ı çağırdık
 import api from '../services/api';
 
 const Dashboard = () => {
-  const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { user } = useContext(AuthContext); // logout'a burada gerek kalmadı
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [transactions, setTransactions] = useState([]);
@@ -59,37 +58,11 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   return (
     <div className="flex h-screen bg-gray-100">
       
-      {/* SOL MENÜ */}
-      <div className="w-64 bg-white shadow-lg hidden md:flex flex-col">
-        <div className="p-6 border-b border-gray-100">
-          <h1 className="text-2xl font-bold text-blue-600 flex items-center gap-2">
-            <FiPieChart /> FinansTakip
-          </h1>
-        </div>
-        
-        <nav className="flex-1 p-4 space-y-2">
-          <button className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-medium transition-colors">
-            <FiPieChart /> Genel Bakış
-          </button>
-        </nav>
-
-        <div className="p-4 border-t border-gray-100">
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-medium transition-colors"
-          >
-            <FiLogOut /> Çıkış Yap
-          </button>
-        </div>
-      </div>
+      {/* ✅ ESKİ KOD GİTTİ, YERİNE BU GELDİ */}
+      <Sidebar />
 
       {/* ANA İÇERİK */}
       <div className="flex-1 overflow-y-auto">
@@ -136,16 +109,15 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* --- 2. YENİ DÜZEN (GRID YAPISI) --- */}
-          {/* Ekran genişse yan yana, darsa alt alta */}
+          {/* Grafikler ve Liste */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* SOL TARAFTA GRAFİK (1/3 Genişlik) */}
+            {/* SOL TARAFTA GRAFİK */}
             <div className="lg:col-span-1">
               <ExpenseChart transactions={transactions} />
             </div>
 
-            {/* SAĞ TARAFTA LİSTE (2/3 Genişlik) */}
+            {/* SAĞ TARAFTA LİSTE */}
             <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <h3 className="text-xl font-bold text-gray-800 mb-4">Son İşlemler</h3>
               <div className="overflow-x-auto">

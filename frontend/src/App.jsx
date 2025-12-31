@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard'; // <-- YENİ EKLENDİ
+import Dashboard from './pages/Dashboard';
+import InvestmentsPage from './pages/InvestmentsPage'; // 👈 YENİ: Sayfayı içeri aldık
 
 function App() {
   return (
@@ -12,7 +13,10 @@ function App() {
         <Route path="/register" element={<Register />} />
         
         {/* Dashboard Rotası */}
-        <Route path="/dashboard" element={<Dashboard />} /> {/* <-- YENİ EKLENDİ */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        
+        {/* Yatırımlar Rotası - 👈 YENİ: Adresi belirledik */}
+        <Route path="/investments" element={<InvestmentsPage />} />
       </Routes>
     </div>
   );
