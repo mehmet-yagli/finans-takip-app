@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs'); // 👇 EKLENDİ: Şifre karşılaştırma ve hashleme için
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 
@@ -116,6 +117,56 @@ router.get('/me', auth, async (req, res) => {
   } catch (error) {
     console.error('Get user hatası:', error.message);
     res.status(500).json({ message: 'Sunucu hatası' });
+  }
+});
+
+// 👇 YENİ EKLENEN ROTA: Profil Güncelleme
+// @route   PUT /api/auth/update
+// @desc    Kullanıcı bilgilerini ve şifresini güncelle
+// @access  Private
+router.put('/update', auth, async (req, res) => {
+  const { name, email, password, newPassword } = req.body;
+
+  try {
+    let user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'Kullanıcı bulunamadı' });
+    }
+
+    // İsim ve Email güncelleme
+    if (name) user.name = name;
+    if (email) user.email = email;
+
+    // Şifre Değiştirme İsteği Varsa
+    if (password && newPassword) {
+      // 1. Mevcut şifreyi kontrol et (Database'deki hash ile kıyasla)
+      // Not: User modelinde comparePassword metodu varsa onu da kullanabilirdik ama burada manuel bcrypt kullandık.
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ msg: 'Mevcut şifreniz hatalı' });
+      }
+      
+      // 2. Yeni şifreyi hashle
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    await user.save();
+
+    // Güncel kullanıcı bilgisini döndür
+    res.json({
+      msg: 'Profil başarıyla güncellendi',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      }
+    });
+
+  } catch (err) {
+    console.error('Profil güncelleme hatası:', err.message);
+    res.status(500).send('Server Error');
   }
 });
 

@@ -9,13 +9,13 @@ const investmentSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['crypto', 'stock', 'commodity'],  // Kripto hisse altın
+    enum: ['crypto', 'stock', 'commodity'],  // Kripto, hisse, emtia
     required: [true, 'Yatırım tipi zorunludur']
   },
   symbol: {
     type: String,
     required: [true, 'Sembol zorunludur'],
-    uppercase: true,  // BTC, ETH, AAPL -> büyük harf
+    uppercase: true,  // BTC, ETH, AEFES -> büyük harf
     trim: true
   },
   name: {
@@ -32,6 +32,13 @@ const investmentSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Alış fiyatı zorunludur'],
     min: [0, 'Alış fiyatı negatif olamaz']
+  },
+  // 🛠️ YENİ EKLENEN ALAN: PARA BİRİMİ
+  currency: {
+    type: String,
+    enum: ['USD', 'TRY'],
+    default: 'USD',
+    required: true
   },
   buyDate: {
     type: Date,
@@ -79,7 +86,7 @@ investmentSchema.virtual('profitLossPercentage').get(function() {
 investmentSchema.set('toJSON', { virtuals: true });
 investmentSchema.set('toObject', { virtuals: true });
 
-// İndeks
+// İndeksler
 investmentSchema.index({ user: 1, type: 1 });
 investmentSchema.index({ user: 1, symbol: 1 });
 

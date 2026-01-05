@@ -72,7 +72,8 @@ router.get('/:id', auth, async (req, res) => {
 // @access  Private
 router.post('/', auth, async (req, res) => {
   try {
-    const { name, type, icon, color } = req.body;
+    // --- GÜNCELLEME: budgetLimit eklendi ---
+    const { name, type, icon, color, budgetLimit } = req.body;
     
     // Validasyon
     if (!name || !type) {
@@ -107,7 +108,8 @@ router.post('/', auth, async (req, res) => {
       name: name.trim(),
       type,
       icon: icon || '📁',
-      color: color || '#3B82F6'
+      color: color || '#3B82F6',
+      budgetLimit: budgetLimit || 0 // Varsayılan 0
     });
     
     await category.save();
@@ -148,7 +150,8 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Bu kategoriyi güncelleme yetkiniz yok' });
     }
     
-    const { name, type, icon, color } = req.body;
+    // --- GÜNCELLEME: budgetLimit eklendi ---
+    const { name, type, icon, color, budgetLimit } = req.body;
     
     // Güncellenecek alanlar
     const updateFields = {};
@@ -163,6 +166,7 @@ router.put('/:id', auth, async (req, res) => {
     }
     if (icon) updateFields.icon = icon;
     if (color) updateFields.color = color;
+    if (budgetLimit !== undefined) updateFields.budgetLimit = budgetLimit;
     
     // İsim ve tip değişiyorsa duplicate kontrolü
     if (name || type) {

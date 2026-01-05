@@ -5,4 +5,11 @@
 body {
   background-color: #f3f4f6;
   font-family: 'Inter', system-ui, sans-serif;
+  /* 👇 YENİ: Renk değişimi sert olmasın, yumuşak geçiş yapsın */
+  @apply transition-colors duration-300;
+}
+
+/* 👇 YENİ: Karanlık mod açıldığında devreye girecek stil */
+.dark body {
+  @apply bg-gray-900 text-white; /* Koyu gri arka plan ve beyaz yazı */
 }

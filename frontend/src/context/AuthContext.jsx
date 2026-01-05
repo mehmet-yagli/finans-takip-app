@@ -63,7 +63,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    // 👇 GÜNCELLEME: 'setUser' fonksiyonunu value içine ekledim.
+    // Bu sayede Settings sayfasından kullanıcı adını güncelleyebileceğiz.
+    <AuthContext.Provider value={{ user, setUser, loading, login, register, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   );

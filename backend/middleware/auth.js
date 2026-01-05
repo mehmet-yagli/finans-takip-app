@@ -1,41 +1,35 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Token doğrulama middleware'i
 const auth = async (req, res, next) => {
   try {
-    // Header'dan token'ı al
     const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ message: 'Yetkisiz erişim.' });
 
-    // Token yoksa hata ver
-    if (!token) {
-      return res.status(401).json({ 
-        message: 'Erişim reddedildi. Lütfen giriş yapın.' 
-      });
-    }
-
-    // Token'ı doğrula
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id || decoded._id || decoded.userId;
 
-    // Kullanıcıyı bul (şifre olmadan)
-    const user = await User.findById(decoded.id).select('-password');
+    // 1. Deneme: Kullanıcıyı ara
+    let user = await User.findById(userId).select('-password');
 
-
-    // Kullanıcı bulunamazsa
+    // Eğer ilk seferde bulamazsa (Atlas senkronizasyon gecikmesi ihtimali)
     if (!user) {
-      return res.status(401).json({ 
-        message: 'Kullanıcı bulunamadı.' 
-      });
+      console.warn(`ID (${userId}) ilk denemede bulunamadı, tekrar deneniyor...`);
+      await new Promise(resolve => setTimeout(resolve, 500)); // 500ms bekle
+      user = await User.findById(userId).select('-password'); // 2. Deneme
     }
 
-    // Kullanıcıyı request'e ekle
-    req.user = user;
-    next();  // Sonraki middleware'e veya route'a geç
+    if (!user) {
+      console.error(`Kritik: ID (${userId}) Atlas'ta gerçekten yok!`);
+      return res.status(401).json({ message: 'Kullanıcı bulunamadı.' });
+    }
 
+    req.user = user;
+    next();
   } catch (error) {
-    res.status(401).json({ 
-      message: 'Geçersiz token. Lütfen tekrar giriş yapın.' 
-    });
+    // "jwt malformed" hatasını burada daha net yakalıyoruz
+    console.error("Auth Hatası:", error.message);
+    res.status(401).json({ message: 'Oturum geçersiz, lütfen tekrar giriş yapın.' });
   }
 };
 

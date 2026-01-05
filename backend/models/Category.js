@@ -24,6 +24,12 @@ const categorySchema = new mongoose.Schema({
   color: {
     type: String,
     default: '#3B82F6'  // Varsayılan renk (mavi)
+  },
+  // --- YENİ EKLENEN ALAN: Bütçe Limiti ---
+  budgetLimit: {
+    type: Number,
+    default: 0, // 0 ise bütçe sınırı yok demektir
+    min: [0, 'Bütçe limiti negatif olamaz']
   }
 }, {
   timestamps: true

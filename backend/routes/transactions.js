@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Transaction = require('../models/Transaction');
+// --- YENİ: Kategori modelini import ettik (Bütçe kontrolü için) ---
+const Category = require('../models/Category'); 
 const auth = require('../middleware/auth');
 
 // Tüm route'lar auth middleware ile korumalı (token gerekli)
@@ -14,7 +16,6 @@ router.get('/', auth, async (req, res) => {
     const transactions = await Transaction.find({ user: req.user._id })
       .sort({ date: -1 });  // Tarihe göre azalan sıralama
     
-    // --- DÜZELTME BURADA YAPILDI ---
     // Eski hali: res.json({ count: ..., transactions: ... });
     // Yeni hali: Direkt listeyi gönderiyoruz. Frontend bunu bekliyor.
     res.json(transactions);
@@ -96,9 +97,63 @@ router.post('/', auth, async (req, res) => {
     
     await transaction.save();
     
-    // --- GÜNCELLEME ---
-    // Tutarlılık olması için burada da direkt objeyi dönüyoruz
-    res.status(201).json(transaction);
+    // --- AKILLI ANALİZ: Bütçe Kontrolü (Sadece Giderler İçin) ---
+    let alertData = null;
+
+    if (type === 'expense') {
+      // 1. İlgili kategoriyi bul ve bütçesi var mı bak
+      const categoryDoc = await Category.findOne({ 
+        user: req.user._id, 
+        name: category 
+      });
+
+      if (categoryDoc && categoryDoc.budgetLimit > 0) {
+        // 2. Bu ayın başlangıç ve bitiş tarihlerini bul
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+        // 3. Bu kategoride bu ay yapılan toplam harcamayı hesapla
+        const stats = await Transaction.aggregate([
+          {
+            $match: {
+              user: req.user._id,
+              category: category,
+              type: 'expense',
+              date: { $gte: startOfMonth, $lte: endOfMonth }
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              totalAmount: { $sum: '$amount' }
+            }
+          }
+        ]);
+
+        const currentTotal = stats.length > 0 ? stats[0].totalAmount : 0;
+        const percentage = (currentTotal / categoryDoc.budgetLimit) * 100;
+
+        // 4. Eğer %80'i geçtiyse uyarı oluştur
+        if (percentage >= 80) {
+          alertData = {
+            category: category,
+            limit: categoryDoc.budgetLimit,
+            current: currentTotal,
+            percentage: Math.round(percentage),
+            message: `Dikkat! ${category} bütçenizin %${Math.round(percentage)}'ine ulaştınız.`
+          };
+        }
+      }
+    }
+
+    // Cevabı hazırla (Transaction objesi + varsa Alert)
+    const response = transaction.toObject();
+    if (alertData) {
+      response.budgetAlert = alertData;
+    }
+    
+    res.status(201).json(response);
     
   } catch (error) {
     console.error('Create transaction hatası:', error.message);
@@ -153,8 +208,63 @@ router.put('/:id', auth, async (req, res) => {
       { $set: updateFields },
       { new: true }  // Güncellenmiş veriyi döndür
     );
+
+    // --- AKILLI ANALİZ: Bütçe Kontrolü (Update sonrası tekrar kontrol) ---
+    // Not: İşlem güncellenince bütçe aşılmış olabilir
+    let alertData = null;
+    const currentType = type || transaction.type;
+    const currentCategory = category || transaction.category;
+
+    if (currentType === 'expense') {
+      const categoryDoc = await Category.findOne({ 
+        user: req.user._id, 
+        name: currentCategory 
+      });
+
+      if (categoryDoc && categoryDoc.budgetLimit > 0) {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+        const stats = await Transaction.aggregate([
+          {
+            $match: {
+              user: req.user._id,
+              category: currentCategory,
+              type: 'expense',
+              date: { $gte: startOfMonth, $lte: endOfMonth }
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              totalAmount: { $sum: '$amount' }
+            }
+          }
+        ]);
+
+        const currentTotal = stats.length > 0 ? stats[0].totalAmount : 0;
+        const percentage = (currentTotal / categoryDoc.budgetLimit) * 100;
+
+        if (percentage >= 80) {
+          alertData = {
+            category: currentCategory,
+            limit: categoryDoc.budgetLimit,
+            current: currentTotal,
+            percentage: Math.round(percentage),
+            message: `Dikkat! ${currentCategory} bütçenizin %${Math.round(percentage)}'ine ulaştınız.`
+          };
+        }
+      }
+    }
     
-    res.json(transaction); // Direkt objeyi döndürdük
+    // Cevabı hazırla
+    const response = transaction.toObject();
+    if (alertData) {
+      response.budgetAlert = alertData;
+    }
+
+    res.json(response); 
     
   } catch (error) {
     console.error('Update transaction hatası:', error.message);
@@ -291,5 +401,63 @@ router.get('/summary/category', auth, async (req, res) => {
     res.status(500).json({ message: 'Sunucu hatası' });
   }
 });
+
+// @route   GET /api/transactions/analytics/history
+// @desc    Son 6 ayın Gelir/Gider analizini getirir (Grafikler için)
+// @access  Private
+router.get('/analytics/history', auth, async (req, res) => {
+  try {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5); // Son 6 ay (Bu ay dahil)
+    sixMonthsAgo.setDate(1); // Ayın başına git
+
+    const stats = await Transaction.aggregate([
+      {
+        $match: {
+          user: req.user._id,
+          date: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$date" },
+            month: { $month: "$date" },
+            type: "$type"
+          },
+          total: { $sum: "$amount" },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    // Veriyi Frontend'in kolay okuyacağı formata çevirelim
+    // Örn: [{ month: "Ocak", income: 5000, expense: 2000 }, ...]
+    const formattedStats = [];
+    const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
+    stats.forEach(item => {
+      const label = `${monthNames[item._id.month - 1]} ${item._id.year}`;
+      let entry = formattedStats.find(e => e.label === label);
+
+      if (!entry) {
+        entry = { label, income: 0, expense: 0, year: item._id.year, month: item._id.month };
+        formattedStats.push(entry);
+      }
+
+      if (item._id.type === 'income') entry.income = item.total;
+      if (item._id.type === 'expense') entry.expense = item.total;
+    });
+
+    res.json(formattedStats);
+
+  } catch (error) {
+    console.error('Analytics History Error:', error.message);
+    res.status(500).json({ message: 'Analiz verisi oluşturulamadı' });
+  }
+});
+
+// module.exports = router;  <-- BU SATIR ZATEN SENDE EN ALTTA VAR, KODU BUNUN ÜSTÜNE YAPIŞTIR.
 
 module.exports = router;

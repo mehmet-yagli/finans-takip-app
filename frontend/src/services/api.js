@@ -1,7 +1,11 @@
 import axios from 'axios';
 
-// Backend'in çalıştığı adres (Server.js'de 5000 portunu ayarlamıştık)
-const API_URL = 'https://finans-takip-backend.onrender.com/api';
+// 👇 DÜZELTME BURADA:
+// Artık direkt Render adresine değil, öncelikle .env dosyasındaki (localhost) ayarına bakacak.
+// Eğer .env dosyasını okuyamazsa bile, güvenlik önlemi olarak 'http://localhost:5000/api' adresini kullanacak.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+console.log("Şu an bağlanılan API:", API_URL); // Bunu konsolda (F12) görebilirsin
 
 const api = axios.create({
   baseURL: API_URL,
@@ -10,8 +14,6 @@ const api = axios.create({
   },
 });
 
-// Her istekten önce çalışacak "Interceptor" (Araya giren bekçi)
-// Eğer localStorage'da token varsa, onu otomatik olarak isteğe ekler.
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
