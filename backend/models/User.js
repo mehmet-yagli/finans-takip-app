@@ -6,13 +6,13 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'İsim zorunludur'],
-    trim: true  // Baştaki ve sondaki boşlukları temizle
+    trim: true 
   },
   email: {
     type: String,
     required: [true, 'Email zorunludur'],
-    unique: true,  // Her email benzersiz olmalı
-    lowercase: true,  // Hepsini küçük harfe çevir
+    unique: true,  
+    lowercase: true, 
     trim: true
   },
   password: {

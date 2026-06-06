@@ -2,12 +2,19 @@
 node_modules/
 frontend/node_modules/
 backend/node_modules/
+mobile/node_modules/
 
 # GİZLİ ŞİFRELER (Burası çok önemli, asla gitmemeli)
 .env
+.env.local
+.env.development
+.env.production
 backend/.env
+
+# Derleme (Build) ve Önbellek Dosyaları
+dist/
+build/
+mobile/.expo/
 
 # İşletim sistemi dosyaları
 .DS_Store
-dist/
-build/

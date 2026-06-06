@@ -9,7 +9,7 @@ const resources = {
       "dashboard": "Dashboard",
       "investments": "Investments",
       "community": "Community", 
-      "contact_us": "Contact Us", // EKLENDİ
+      "contact_us": "Contact Us",
       "community_desc": "Discuss ideas with other users.",
       "logout": "Logout",
       "dark_mode": "Dark Mode",
@@ -17,8 +17,12 @@ const resources = {
       "loading": "Loading...",
       "welcome": "Welcome, {{name}}",
       "untitled": "Untitled",
+      
+      "good_morning": "Good Morning",
+      "good_afternoon": "Good Afternoon",
+      "good_evening": "Good Evening",
 
-      // Dashboard & Trend Analizi (GÜNCELLENDİ)
+      // Dashboard & Trend Analizi
       "portfolio_summary": "Instant summary of your financial portfolio.",
       "net_cash_flow": "Net Cash Flow",
       "total_income": "Total Income",
@@ -26,8 +30,8 @@ const resources = {
       "expense_analysis": "Expense Analysis",
       "portfolio_distribution": "Portfolio Distribution",
       "recent_transactions": "Recent Transactions",
-      "financial_trend_analysis": "Financial Trend Analysis", // EKLENDİ
-      "financial_trend_desc": "Income and expense changes over time", // EKLENDİ
+      "financial_trend_analysis": "Financial Trend Analysis", 
+      "financial_trend_desc": "Income and expense changes over time", 
       "quick_add": "Quick Add",
       "expenses": "Expenses",
       "no_data": "No Data Found",
@@ -39,9 +43,9 @@ const resources = {
       "delete_all_confirm": "Are you sure you want to delete ALL transactions?",
       "cleared": "History cleared",
       "deleted": "Transaction deleted",
-      "3_months": "3 Months", // EKLENDİ
-      "6_months": "6 Months", // EKLENDİ
-      "year": "Year", // EKLENDİ
+      "3_months": "3 Months",
+      "6_months": "6 Months",
+      "year": "Year",
 
       // MODAL (TRANSACTION ADD)
       "add_new_transaction": "Add New Transaction",
@@ -76,7 +80,7 @@ const resources = {
       "community_rules_desc": "Be respectful and constructive. No investment advice.",
       "points_suffix": "Pts",
 
-      // CONTACT US (BİZE ULAŞIN) - YENİ EKLENDİ
+      // CONTACT US
       "contact_title": "Contact Us",
       "contact_subtitle": "We are here for your questions, suggestions, or support.",
       "subject": "Subject",
@@ -94,7 +98,7 @@ const resources = {
       "email_support": "Email Support",
       "message_placeholder": "How can we help you?",
 
-      // CHATBOT - YENİ EKLENDİ
+      // CHATBOT
       "ai_assistant": "Financial Assistant",
       "online": "Online",
       "type_message": "Type a question...",
@@ -191,11 +195,15 @@ const resources = {
       "Satış": "Sale",
       "Ek Gelir": "Side Income",
 
-      // AYARLAR
+      // AYARLAR & YENİ EKLENEN SETTINGS METİNLERİ
       "settings": "Settings",
+      "settings_desc": "Manage your account settings and preferences here.",
       "profile": "Profile",
+      "profile_desc": "Update your personal information.",
       "security": "Security",
+      "security_desc": "Manage your password and account security.",
       "preferences": "Preferences",
+      "preferences_desc": "Appearance and localization settings.",
       "save_changes": "Save Changes",
       "current_password": "Current Password",
       "new_password": "New Password",
@@ -203,6 +211,24 @@ const resources = {
       "currency": "Default Currency",
       "theme": "Theme",
       "update_success": "Settings updated successfully!",
+      "recurring_transactions": "Recurring Transactions",
+      "recurring_transactions_desc": "Manage your automated monthly incomes and expenses. (You can update amounts based on raises or increases)",
+      "no_recurring_tx": "You don't have any recurring transactions yet.",
+      "no_recurring_tx_desc": "You can use the 'Recurring Transaction' option while adding a new income or expense.",
+      "every_month": "Every month on the",
+      "day": "day",
+      "stop_automation": "Stop Automation",
+      "notifications": "Notifications",
+      "notification_prefs": "Notification Preferences",
+      "notification_prefs_desc": "Choose which topics you want to receive notifications about.",
+      "monthly_budget_summary": "Monthly Budget Summary",
+      "price_alarms": "Price Alarms",
+      "new_feature_announcements": "New Feature Announcements",
+      "security_alerts": "Security Alerts",
+      "danger_zone": "Danger Zone",
+      "danger_zone_desc": "Deleting your account is an irreversible action. Please be careful.",
+      "delete_account": "Delete My Account Permanently",
+      "cancel": "Cancel",
 
       // PİYASA
       "market": "Market",
@@ -218,7 +244,6 @@ const resources = {
       "add_to_list": "Add to Watchlist", 
       "enter_symbol_error": "Please enter a symbol.", 
       "already_in_watchlist": "Already in watchlist.", 
-      "added_success": "added successfully!", 
       "asset_not_found": "Asset not found.", 
       "currency_rates": "Exchange Rates (Live)",
       "market_sentiment": "Market Sentiment",
@@ -243,7 +268,7 @@ const resources = {
       "dashboard": "Genel Bakış",
       "investments": "Yatırımlarım",
       "community": "Topluluk", 
-      "contact_us": "Bize Ulaşın", // EKLENDİ
+      "contact_us": "Bize Ulaşın", 
       "community_desc": "Diğer kullanıcılarla fikir alışverişi yapın.", 
       "logout": "Çıkış Yap",
       "dark_mode": "Karanlık Mod",
@@ -251,8 +276,12 @@ const resources = {
       "loading": "Yükleniyor...",
       "welcome": "Hoş Geldin, {{name}}",
       "untitled": "İsimsiz",
+      
+      "good_morning": "Günaydın",
+      "good_afternoon": "İyi Günler",
+      "good_evening": "İyi Akşamlar",
 
-      // Dashboard & Trend Analizi (GÜNCELLENDİ)
+      // Dashboard & Trend Analizi 
       "portfolio_summary": "Finansal portföyünün anlık özeti.",
       "net_cash_flow": "Net Nakit Akışı",
       "total_income": "Toplam Gelir",
@@ -260,8 +289,8 @@ const resources = {
       "expense_analysis": "Harcama Analizi",
       "portfolio_distribution": "Portföy Dağılımı",
       "recent_transactions": "Son Hareketler",
-      "financial_trend_analysis": "Finansal Trend Analizi", // EKLENDİ
-      "financial_trend_desc": "Zaman içindeki gelir ve gider değişimi", // EKLENDİ
+      "financial_trend_analysis": "Finansal Trend Analizi", 
+      "financial_trend_desc": "Zaman içindeki gelir ve gider değişimi", 
       "quick_add": "Hızlı Ekle",
       "expenses": "Harcamalar",
       "no_data": "Veri Bulunamadı",
@@ -273,9 +302,9 @@ const resources = {
       "delete_all_confirm": "Tüm işlemleri kalıcı olarak silmek istediğinize emin misiniz?",
       "cleared": "Tüm geçmiş temizlendi",
       "deleted": "İşlem silindi",
-      "3_months": "3 Ay", // EKLENDİ
-      "6_months": "6 Ay", // EKLENDİ
-      "year": "Yıl", // EKLENDİ
+      "3_months": "3 Ay",
+      "6_months": "6 Ay", 
+      "year": "Yıl", 
 
       // MODAL (TRANSACTION ADD)
       "add_new_transaction": "Yeni İşlem Ekle",
@@ -310,7 +339,7 @@ const resources = {
       "community_rules_desc": "Saygılı olun. Yatırım tavsiyesi yasaktır.",
       "points_suffix": "Puan",
 
-      // CONTACT US (BİZE ULAŞIN) - YENİ EKLENDİ
+      // CONTACT US
       "contact_title": "Bize Ulaşın",
       "contact_subtitle": "Sorularınız, önerileriniz veya destek için buradayız.",
       "subject": "Konu",
@@ -328,7 +357,7 @@ const resources = {
       "email_support": "E-Posta",
       "message_placeholder": "Size nasıl yardımcı olabiliriz?",
 
-      // CHATBOT - YENİ EKLENDİ
+      // CHATBOT
       "ai_assistant": "Finans Asistanı",
       "online": "Çevrimiçi",
       "type_message": "Bir soru sor...",
@@ -342,7 +371,6 @@ const resources = {
       "asset_distribution": "Varlık Dağılımı",
       "portfolio_table": "Portföy Detayları",
       "asset_name": "Varlık İsmi",
-      "amount": "Miktar",
       "buy_price": "Alış Fiyatı",
       "current_price": "Güncel Fiyat",
       "total_value": "Toplam Değer",
@@ -354,7 +382,6 @@ const resources = {
       "crypto": "Kripto",
       "stock": "Hisse",
       "foreign_currency": "Döviz",
-      "date": "Tarih",
       "symbol": "Sembol (Örn: BTC, GARAN)",
       "refresh_prices": "Fiyatları Güncelle",
       "updating": "Güncelleniyor...",
@@ -395,9 +422,9 @@ const resources = {
       // BÜTÇE YÖNETİMİ
       "budget_limits": "Bütçe Limitleri",
       "category_budgets": "Kategori Bütçeleri",
-      "category_budgets_desc": "Harcama kategorileriniz için aylık limit belirleyin. %80'e ulaştığınızda sizi uyaralım.",
+      "category_budgets_desc": "Harcama kategorileriniz için aylık limit belirleyin. Hedeflerinize sadık kalın.",
       "active_budget": "Aktif Bütçe",
-      "no_limit": "Limitsiz",
+      "no_limit": "Limit Yok",
       "enter_limit": "Limit Girin",
       "current_limit": "Mevcut Limit",
       "monthly_limit": "Aylık Limit",
@@ -429,11 +456,15 @@ const resources = {
       "Satış": "Satış",
       "Ek Gelir": "Ek Gelir",
 
-      // AYARLAR
+      // AYARLAR & YENİ EKLENEN SETTINGS METİNLERİ
       "settings": "Ayarlar",
+      "settings_desc": "Hesap ayarlarınızı ve tercihlerinizi buradan yönetin.",
       "profile": "Profil",
+      "profile_desc": "Kişisel bilgilerinizi güncelleyin ve profilinizi yönetin.",
       "security": "Güvenlik",
+      "security_desc": "Şifre işlemleri ve hesap güvenliği.",
       "preferences": "Tercihler",
+      "preferences_desc": "Görünüm ve yerel ayarlar.",
       "save_changes": "Değişiklikleri Kaydet",
       "current_password": "Mevcut Şifre",
       "new_password": "Yeni Şifre",
@@ -441,6 +472,24 @@ const resources = {
       "currency": "Varsayılan Para Birimi",
       "theme": "Tema",
       "update_success": "Ayarlar başarıyla güncellendi!",
+      "recurring_transactions": "Düzenli İşlemler",
+      "recurring_transactions_desc": "Her ay otomatik işlenen finansal hareketlerinizi buradan kontrol edin. (Zamlara göre tutarı güncelleyebilirsiniz)",
+      "no_recurring_tx": "Henüz düzenli işleminiz bulunmuyor.",
+      "no_recurring_tx_desc": "Ana sayfadan işlem eklerken 'Düzenli İşlem' seçeneğini kullanabilirsiniz.",
+      "every_month": "Her ayın",
+      "day": "günü",
+      "stop_automation": "Otomatik Eklemeyi Durdur",
+      "notifications": "Bildirimler",
+      "notification_prefs": "Bildirim Tercihleri",
+      "notification_prefs_desc": "Hangi konularda bildirim almak istediğinizi yönetin.",
+      "monthly_budget_summary": "Aylık Bütçe Özeti",
+      "price_alarms": "Fiyat Alarmları",
+      "new_feature_announcements": "Yeni Özellik Duyuruları",
+      "security_alerts": "Güvenlik Uyarıları",
+      "danger_zone": "Tehlikeli Bölge",
+      "danger_zone_desc": "Hesabınızı silmek geri alınamaz bir işlemdir. Lütfen dikkatli olun.",
+      "delete_account": "Hesabımı Kalıcı Olarak Sil",
+      "cancel": "İptal",
 
       // PİYASA
       "market": "Piyasa",
@@ -456,7 +505,6 @@ const resources = {
       "add_to_list": "Listeye Ekle", 
       "enter_symbol_error": "Lütfen bir sembol girin.", 
       "already_in_watchlist": "Bu varlık zaten listenizde.", 
-      "added_success": "başarıyla eklendi!", 
       "asset_not_found": "Varlık bulunamadı.", 
       "currency_rates": "Döviz Kurları (Canlı)",
       "market_sentiment": "Piyasa Algısı",

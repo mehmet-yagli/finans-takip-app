@@ -1,18 +1,10 @@
-import { useState, useEffect } from 'react';
-import { FiX, FiCheck } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiX, FiCheck, FiRefreshCw } from 'react-icons/fi';
 import api from '../services/api';
 import { toast } from 'react-hot-toast';
+import { useCurrency } from '../context/CurrencyContext';
 
 const AddTransactionModal = ({ isOpen, onClose, onTransactionAdded }) => {
-  const [amount, setAmount] = useState('');
-  const [type, setType] = useState('expense'); 
-  const [category, setCategory] = useState('');
-  const [description, setDescription] = useState('');
-  const [currency, setCurrency] = useState('TRY'); // Varsayılan para birimi
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [exchangeRate, setExchangeRate] = useState(36.50); // Yedek kur
-
-  // KATEGORİ LİSTELERİ
   const expenseCategories = [
     "Market", "Fatura", "Ulaşım", "Kira", "Eğlence", 
     "Sağlık", "Eğitim", "Giyim", "Elektronik", "Diğer"
@@ -23,60 +15,46 @@ const AddTransactionModal = ({ isOpen, onClose, onTransactionAdded }) => {
     "Borsa/Kripto", "Prim", "Hediye", "Satış", "Diğer"
   ];
 
-  // Modal açıldığında güncel kuru çek
-  useEffect(() => {
-    if (isOpen) {
-      const fetchRate = async () => {
-        try {
-          const response = await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');
-          const data = await response.json();
-          if (data?.rates?.TRY) {
-            setExchangeRate(data.rates.TRY);
-          }
-        } catch (error) {
-          console.error("Kur çekilemedi, varsayılan kullanılıyor.");
-        }
-      };
-      fetchRate();
-    }
-  }, [isOpen]);
+  const { usdToTry } = useCurrency();
 
-  useEffect(() => {
-    if (type === 'income') {
+  const [amount, setAmount] = useState('');
+  const [type, setType] = useState('expense'); 
+  const [category, setCategory] = useState(expenseCategories[0]);
+  const [description, setDescription] = useState('');
+  const [currency, setCurrency] = useState('TRY');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isRecurring, setIsRecurring] = useState(false);
+
+  const handleTypeChange = (newType) => {
+    setType(newType);
+    if (newType === 'income') {
       setCategory(incomeCategories[0]); 
     } else {
       setCategory(expenseCategories[0]); 
     }
-    // eslint-disable-next-line
-  }, [type]);
+  };
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // DİKKAT: Artık kuru bölmüyoruz! Veri tam olarak girildiği gibi kalıyor.
       let finalAmount = parseFloat(amount);
 
-      // EĞER KULLANICI TRY GİRDİYSE -> USD'YE ÇEVİRİP KAYDET
-      // Çünkü sistemin ana para birimi USD. Dashboard'da tekrar TRY'ye çevrilince doğru görünür.
-      if (currency === 'TRY') {
-        finalAmount = finalAmount / exchangeRate;
-      }
-
       const newTransaction = {
-        amount: finalAmount, // Veritabanına USD olarak gider
+        amount: finalAmount, 
+        currency: currency, // YENİ: Backend'e artık bu işlemin TRY mi USD mi olduğunu açıkça söylüyoruz!
         type,
         category,
         description,
         date,
+        isRecurring
       };
 
-      // --- GÜNCELLEME: Response'u yakalıyoruz ---
       const response = await api.post('/transactions', newTransaction);
       
-      // Bütçe Uyarısı Var mı? (Backend'den 'budgetAlert' objesi dönerse)
       if (response.data.budgetAlert) {
-          // Özel uyarı mesajı (Sarı ikonlu ve daha uzun süreli)
           toast(response.data.budgetAlert.message, {
               icon: '⚠️',
               duration: 5000,
@@ -88,17 +66,16 @@ const AddTransactionModal = ({ isOpen, onClose, onTransactionAdded }) => {
               },
           });
       } else {
-          // Standart başarı mesajı
-          toast.success('İşlem başarıyla eklendi!');
+          toast.success(isRecurring ? 'Düzenli işlem başarıyla oluşturuldu!' : 'İşlem başarıyla eklendi!');
       }
 
       onTransactionAdded(); 
       onClose(); 
       
-      // Formu temizle
       setAmount('');
       setDescription('');
-      setCurrency('TRY'); // Varsayılana dön
+      setCurrency('TRY'); 
+      setIsRecurring(false); 
     } catch (error) {
       console.error(error);
       toast.error('Ekleme başarısız oldu.');
@@ -107,42 +84,38 @@ const AddTransactionModal = ({ isOpen, onClose, onTransactionAdded }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-100 animate-fade-in-up">
+      <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-100 animate-fade-in-up">
         
-        {/* Başlık */}
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-          <h3 className="text-lg font-bold text-gray-800">Yeni İşlem Ekle</h3>
-          <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-            <FiX className="text-gray-500" />
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white">Yeni İşlem Ekle</h3>
+          <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
+            <FiX className="text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           
-          {/* Gelir / Gider Seçimi */}
-          <div className="grid grid-cols-2 gap-4 p-1 bg-gray-100 rounded-xl">
+          <div className="grid grid-cols-2 gap-4 p-1 bg-gray-100 dark:bg-gray-900/50 rounded-xl">
             <button
               type="button"
-              onClick={() => setType('expense')}
+              onClick={() => handleTypeChange('expense')}
               className={`py-2 rounded-lg text-sm font-semibold transition-all ${
-                type === 'expense' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                type === 'expense' ? 'bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
               }`}
             >
               Gider (Harcama)
             </button>
             <button
               type="button"
-              onClick={() => setType('income')}
+              onClick={() => handleTypeChange('income')}
               className={`py-2 rounded-lg text-sm font-semibold transition-all ${
-                type === 'income' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                type === 'income' ? 'bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
               }`}
             >
               Gelir (Para Girişi)
             </button>
           </div>
 
-          {/* Tutar ve Para Birimi */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Tutar</label>
             <div className="flex gap-2">
@@ -151,34 +124,34 @@ const AddTransactionModal = ({ isOpen, onClose, onTransactionAdded }) => {
                 required
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-bold text-gray-800"
+                className="w-full p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-bold text-gray-800 dark:text-white"
                 placeholder="0.00"
                 step="any"
               />
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="w-24 p-3 bg-gray-100 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700 cursor-pointer"
+                className="w-24 p-3 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700 dark:text-gray-200 cursor-pointer"
               >
                 <option value="TRY">₺ TRY</option>
                 <option value="USD">$ USD</option>
               </select>
             </div>
-            {currency === 'TRY' && (
+            {/* Önizleme: TRY girilirse yaklaşık Dolar karşılığını bilgi amaçlı gösteriyoruz */}
+            {currency === 'TRY' && amount && (
                <p className="text-[10px] text-gray-400 mt-1 ml-1">
-                 Yaklaşık: ${(parseFloat(amount || 0) / exchangeRate).toFixed(2)} (Kur: {exchangeRate.toFixed(2)})
+                 Yaklaşık: ${(parseFloat(amount || 0) / usdToTry).toFixed(2)} USD (Kur: {usdToTry.toFixed(2)})
                </p>
             )}
           </div>
 
-          {/* Kategori ve Tarih */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Kategori</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer text-sm font-medium"
+                className="w-full p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer text-sm font-medium dark:text-white"
               >
                 {type === 'expense' 
                   ? expenseCategories.map((cat) => <option key={cat} value={cat}>{cat}</option>)
@@ -193,24 +166,38 @@ const AddTransactionModal = ({ isOpen, onClose, onTransactionAdded }) => {
                 required
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium"
+                className="w-full p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium dark:text-white"
               />
             </div>
           </div>
 
-          {/* Açıklama */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Açıklama</label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm dark:text-white"
               placeholder="Örn: Açıklama giriniz..."
             />
           </div>
 
-          {/* Kaydet Butonu */}
+          <div className="flex items-center justify-between p-4 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+                <FiRefreshCw size={16} className={isRecurring ? "animate-spin-slow" : ""} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Düzenli İşlem</h4>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">Her ay otomatik olarak eklensin.</p>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" checked={isRecurring} onChange={() => setIsRecurring(!isRecurring)} />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
           <button
             type="submit"
             className={`w-full py-4 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 ${

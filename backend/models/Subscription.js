@@ -32,6 +32,11 @@ const SubscriptionSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  // 👇 YENİ EKLENEN ALAN: Mobildeki o şık renkli ikonları veritabanından beslemek için
+  color: {
+    type: String,
+    default: '#3B82F6' // Varsayılan WhaleStreet mavisi
+  },
   createdAt: {
     type: Date,
     default: Date.now

@@ -1,9 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const auth = require('../middleware/auth'); 
+const https = require('https'); 
+const auth = require('../middleware/auth');
 
-// Basit bir "In-Memory" Cache (Önbellek) Sistemi
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance();
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+const httpsAgent = new https.Agent({  
+  rejectUnauthorized: false 
+});
+
 let marketCache = {
   data: null,
   lastFetch: 0
@@ -11,21 +20,17 @@ let marketCache = {
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 Dakika
 
-// --- 🛠️ YENİ: Dışarıdan Çağrılabilir Veri Fonksiyonu ---
-// Bu fonksiyonu hem aşağıdaki route kullanacak hem de AI modülü kullanacak.
 const getMarketData = async () => {
   const currentTime = Date.now();
 
-  // 1. Cache Kontrolü
   if (marketCache.data && (currentTime - marketCache.lastFetch < CACHE_DURATION)) {
     return marketCache.data;
   }
 
-  // 2. Yeni Veri Çekme
   console.log('🔄 Servis: Piyasa verisi güncelleniyor...');
   
   try {
-      // CoinGecko
+      // CoinGecko - Kripto Verileri
       const cryptoRes = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
         params: {
           vs_currency: 'usd',
@@ -33,48 +38,89 @@ const getMarketData = async () => {
           order: 'market_cap_desc',
           per_page: 10,
           page: 1,
-          sparkline: true 
+          sparkline: true
         },
-        timeout: 5000 
-      });
+        httpsAgent, 
+        timeout: 8000 
+      }).catch(e => { console.error("Kripto çekilemedi:", e.message); return { data: [] }; });
 
-      // Frankfurter (Döviz)
-      const forexRes = await axios.get('https://api.frankfurter.app/latest?from=USD&to=EUR,TRY,GBP,JPY', {
-          timeout: 5000
-      });
+      // ER-API - Döviz Kurları (Güncellendi)
+      const forexRes = await axios.get('https://open.er-api.com/v6/latest/USD', {
+          httpsAgent, 
+          timeout: 8000
+      }).catch(e => { console.error("Döviz çekilemedi:", e.message); return { data: { rates: {} } }; });
+
+      const popularStocks = [
+          { sym: 'THYAO.IS', name: 'Türk Hava Yolları' },
+          { sym: 'TUPRS.IS', name: 'Tüpraş' },
+          { sym: 'FROTO.IS', name: 'Ford Otosan' },
+          { sym: 'SASA.IS', name: 'Sasa Polyester' },
+          { sym: 'EREGL.IS', name: 'Ereğli Demir Çelik' },
+          { sym: 'AAPL', name: 'Apple Inc.' },
+          { sym: 'TSLA', name: 'Tesla Inc.' }
+      ];
+
+      const symbolsToFetch = popularStocks.map(s => s.sym);
+      let stocks = [];
+
+      try {
+          // 🚀 ÇÖZÜM: validateResult parametresini kaldırdık. Sadece diziyi gönderiyoruz.
+          const quotes = await yahooFinance.quote(symbolsToFetch);
+          const quotesArray = Array.isArray(quotes) ? quotes : [quotes];
+
+          stocks = quotesArray.map(quote => {
+              const symConfig = popularStocks.find(s => s.sym === quote.symbol);
+              if (!symConfig || !quote.regularMarketPrice) return null;
+
+              const p = quote.regularMarketPrice;
+              const c = quote.regularMarketChangePercent || 0;
+              const startP = p / (1 + (c / 100)); 
+              const sparkline = [startP, startP + (p-startP)*0.2, startP + (p-startP)*0.5, startP + (p-startP)*0.7, p*0.998, p*1.002, p];
+
+              let currency = 'USD';
+              if (quote.currency === 'TRY' || quote.symbol.includes('.IS')) currency = 'TRY';
+
+              return {
+                  id: quote.symbol.toLowerCase().replace('.is', ''),
+                  symbol: quote.symbol.replace('.IS', ''),
+                  name: symConfig.name,
+                  price: p,
+                  change: parseFloat(c.toFixed(2) || 0),
+                  currency: currency,
+                  marketCap: quote.marketCap,
+                  sparkline: sparkline
+              };
+          }).filter(Boolean); 
+      } catch (stockError) {
+          console.error("❌ Yahoo Hisse Çekim Hatası:", stockError.message);
+      }
 
       const newData = {
         crypto: cryptoRes.data,
-        rates: forexRes.data.rates, 
+        stocks: stocks, 
+        rates: forexRes.data.rates || { TRY: 36.50, EUR: 0.92, GBP: 0.79 },
         lastUpdated: currentTime
       };
 
-      // Cache Güncelle
-      marketCache = {
-        data: newData,
-        lastFetch: currentTime
-      };
-
+      marketCache = { data: newData, lastFetch: currentTime };
       return newData;
 
   } catch (error) {
-      console.error('Market Service Hatası:', error.message);
-      // Hata varsa ve cache doluysa eskiyi dön
+      console.error('❌ Market Service Genel Hatası:', error.message);
       if (marketCache.data) return marketCache.data;
-      throw error;
+      
+      return { crypto: [], stocks: [], rates: { TRY: 36.50 }, lastUpdated: currentTime, error: true };
   }
 };
 
-// @route   GET /api/market
 router.get('/', async (req, res) => {
   try {
-    const data = await getMarketData(); // Yukarıdaki ortak fonksiyonu kullan
+    const data = await getMarketData(); 
     res.json(data);
   } catch (error) {
-    res.status(500).json({ msg: 'Piyasa verilerine şu an ulaşılamıyor.' });
+    res.status(200).json({ msg: 'Piyasa verilerine ulaşılamıyor.', crypto: [], stocks: [], rates: { TRY: 36.50 } });
   }
 });
 
-// 👇 ÖNEMLİ: Router'ı export ederken yanına fonksiyonu da ekliyoruz
 module.exports = router;
 module.exports.getMarketData = getMarketData;

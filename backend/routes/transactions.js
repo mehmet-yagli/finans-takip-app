@@ -7,6 +7,93 @@ const auth = require('../middleware/auth');
 
 // Tüm route'lar auth middleware ile korumalı (token gerekli)
 
+// 👇 YENİ ENDPOINT: DÜZENLİ İŞLEMLERİ KONTROL ET VE EKLE (CRON JOB GİBİ ÇALIŞIR)
+// @route   GET /api/transactions/recurring/check
+// @desc    Bu aya ait düzenli işlemleri kontrol et, eksikse otomatik ekle
+// @access  Private
+router.get('/recurring/check', auth, async (req, res) => {
+  try {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0-11
+    const currentDay = today.getDate();
+
+    // 1. Kullanıcının tüm "Düzenli" (isRecurring: true) işlemlerini bul (Şablonlar)
+    // Sadece günü gelmiş veya geçmiş olanları al. İleri tarihlileri henüz ekleme.
+    const recurringTemplates = await Transaction.find({ 
+      user: req.user._id, 
+      isRecurring: true,
+      recurringDay: { $lte: currentDay } 
+    });
+
+    if (recurringTemplates.length === 0) {
+      return res.json({ message: 'İşlenecek düzenli kayıt bulunamadı.' });
+    }
+
+    let addedCount = 0;
+
+    // 2. Her bir şablon için bu ay eklenip eklenmediğini kontrol et
+    for (const template of recurringTemplates) {
+      // Şablonun orijinal oluşturulma ayı ve yılı
+      const templateDate = new Date(template.date);
+      
+      // Eğer şablon zaten BU AY oluşturulmuşsa, tekrar eklemeye gerek yok
+      if (templateDate.getFullYear() === currentYear && templateDate.getMonth() === currentMonth) {
+         continue;
+      }
+
+      // Bu şablondan üretilmiş, bu aya ait bir kopya var mı? (category, amount ve type'a göre eşleştir)
+      // Mükemmel çözüm için, kopyaların içine parentTemplateId gibi bir referans da koyulabilirdi 
+      // ama basit ve etkili tutmak için isim/tutar/kategori eşleşmesi yapıyoruz.
+      const startOfMonth = new Date(currentYear, currentMonth, 1);
+      const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+
+      const existingCopy = await Transaction.findOne({
+         user: req.user._id,
+         type: template.type,
+         category: template.category,
+         description: template.description,
+         // isRecurring: false olmalı çünkü bu bir kopyadır
+         date: { $gte: startOfMonth, $lte: endOfMonth }
+      });
+
+      // Eğer bu ay bu kopya yoksa, ŞİMDİ YENİ BİR İŞLEM OLARAK EKLE!
+      if (!existingCopy) {
+         // Kopyanın tarihini, o ayın recurringDay günü olarak ayarla
+         let copyDateDay = template.recurringDay;
+         // Şubatta 30-31 çeken günler için hata düzeltmesi
+         const maxDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+         if (copyDateDay > maxDaysInMonth) copyDateDay = maxDaysInMonth;
+
+         const newTransactionDate = new Date(currentYear, currentMonth, copyDateDay, 12, 0, 0);
+
+         const newTransaction = new Transaction({
+            user: req.user._id,
+            type: template.type,
+            category: template.category,
+            amount: template.amount,
+            description: template.description,
+            date: newTransactionDate,
+            isRecurring: false, // Bu bir "kopya", şablonun kendisi değil
+            // 👇 GÜNCELLEME: Eğer şablon bir yatırımsa o verileri de taşı
+            symbol: template.symbol,
+            assetName: template.assetName,
+            purchasePrice: template.purchasePrice
+         });
+
+         await newTransaction.save();
+         addedCount++;
+      }
+    }
+
+    res.json({ message: 'Düzenli işlem kontrolü tamamlandı.', addedRecords: addedCount });
+  } catch (error) {
+    console.error('Recurring check hatası:', error.message);
+    res.status(500).json({ message: 'Sunucu hatası' });
+  }
+});
+
+
 // @route   GET /api/transactions
 // @desc    Kullanıcının tüm işlemlerini getir
 // @access  Private
@@ -62,7 +149,8 @@ router.get('/:id', auth, async (req, res) => {
 // @access  Private
 router.post('/', auth, async (req, res) => {
   try {
-    const { type, category, amount, description, date } = req.body;
+    // 👇 GÜNCELLEME: Frontend'den isRecurring ve YENİ YATIRIM alanlarını karşılıyoruz
+    const { type, category, amount, description, date, isRecurring, symbol, assetName, purchasePrice } = req.body;
     
     // Validasyon - zorunlu alanlar
     if (!type || !category || !amount) {
@@ -71,10 +159,10 @@ router.post('/', auth, async (req, res) => {
       });
     }
     
-    // Type kontrolü
-    if (type !== 'income' && type !== 'expense') {
+    // 👇 GÜNCELLEME: Type kontrolüne 'investment' eklendi
+    if (type !== 'income' && type !== 'expense' && type !== 'investment') {
       return res.status(400).json({ 
-        message: 'İşlem tipi sadece "income" veya "expense" olabilir' 
+        message: 'İşlem tipi sadece "income", "expense" veya "investment" olabilir' 
       });
     }
     
@@ -85,6 +173,9 @@ router.post('/', auth, async (req, res) => {
       });
     }
     
+    // İşlem Tarihi Belirleme (Düzenli işlem günü de buradan çekilir)
+    const transactionDate = date ? new Date(date) : new Date();
+
     // Yeni işlem oluştur
     const transaction = new Transaction({
       user: req.user._id,
@@ -92,7 +183,13 @@ router.post('/', auth, async (req, res) => {
       category,
       amount,
       description: description || '',
-      date: date || Date.now()
+      date: transactionDate,
+      isRecurring: isRecurring || false,
+      recurringDay: (isRecurring) ? transactionDate.getDate() : null,
+      // 👇 GÜNCELLEME: Yatırım verileri (Eğer yoksa null kalır, normal işlemleri bozmaz)
+      symbol: symbol || null,
+      assetName: assetName || null,
+      purchasePrice: purchasePrice || null
     });
     
     await transaction.save();
@@ -178,14 +275,16 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Bu işlemi güncelleme yetkiniz yok' });
     }
     
-    const { type, category, amount, description, date } = req.body;
+    // 👇 GÜNCELLEME: Yatırım alanları da güncellenebilir olsun
+    const { type, category, amount, description, date, isRecurring, symbol, assetName, purchasePrice } = req.body;
     
     // Güncellenecek alanlar
     const updateFields = {};
     if (type) {
-      if (type !== 'income' && type !== 'expense') {
+      // 👇 GÜNCELLEME: 'investment' eklendi
+      if (type !== 'income' && type !== 'expense' && type !== 'investment') {
         return res.status(400).json({ 
-          message: 'İşlem tipi sadece "income" veya "expense" olabilir' 
+          message: 'İşlem tipi sadece "income", "expense" veya "investment" olabilir' 
         });
       }
       updateFields.type = type;
@@ -200,7 +299,25 @@ router.put('/:id', auth, async (req, res) => {
       updateFields.amount = amount;
     }
     if (description !== undefined) updateFields.description = description;
-    if (date) updateFields.date = date;
+    
+    // 👇 GÜNCELLEME: Yatırım güncellemesi
+    if (symbol !== undefined) updateFields.symbol = symbol;
+    if (assetName !== undefined) updateFields.assetName = assetName;
+    if (purchasePrice !== undefined) updateFields.purchasePrice = purchasePrice;
+    
+    // Tarih veya Düzenlilik değiştiyse
+    if (date) {
+        updateFields.date = date;
+    }
+    if (isRecurring !== undefined) {
+        updateFields.isRecurring = isRecurring;
+        if (isRecurring) {
+            const tempDate = date ? new Date(date) : new Date(transaction.date);
+            updateFields.recurringDay = tempDate.getDate();
+        } else {
+            updateFields.recurringDay = null;
+        }
+    }
     
     // Güncelle
     transaction = await Transaction.findByIdAndUpdate(
@@ -210,7 +327,6 @@ router.put('/:id', auth, async (req, res) => {
     );
 
     // --- AKILLI ANALİZ: Bütçe Kontrolü (Update sonrası tekrar kontrol) ---
-    // Not: İşlem güncellenince bütçe aşılmış olabilir
     let alertData = null;
     const currentType = type || transaction.type;
     const currentCategory = category || transaction.category;
@@ -333,12 +449,15 @@ router.get('/summary/monthly', auth, async (req, res) => {
     // Gelir ve gider hesapla
     let totalIncome = 0;
     let totalExpense = 0;
+    let totalInvestment = 0; // 👇 GÜNCELLEME: Yatırım Toplamı Eklendi
     
     transactions.forEach(transaction => {
       if (transaction.type === 'income') {
         totalIncome += transaction.amount;
-      } else {
+      } else if (transaction.type === 'expense') {
         totalExpense += transaction.amount;
+      } else if (transaction.type === 'investment') {
+        totalInvestment += transaction.amount;
       }
     });
     
@@ -349,6 +468,7 @@ router.get('/summary/monthly', auth, async (req, res) => {
       month: targetMonth,
       totalIncome,
       totalExpense,
+      totalInvestment, // 👇 GÜNCELLEME
       balance,
       transactionCount: transactions.length
     });
@@ -367,9 +487,9 @@ router.get('/summary/category', auth, async (req, res) => {
     const { type } = req.query;  // income veya expense
     
     // Type kontrolü
-    if (type && type !== 'income' && type !== 'expense') {
+    if (type && type !== 'income' && type !== 'expense' && type !== 'investment') { // 👇 GÜNCELLEME
       return res.status(400).json({ 
-        message: 'Type parametresi "income" veya "expense" olmalıdır' 
+        message: 'Type parametresi "income", "expense" veya "investment" olmalıdır' 
       });
     }
     
@@ -433,7 +553,6 @@ router.get('/analytics/history', auth, async (req, res) => {
     ]);
 
     // Veriyi Frontend'in kolay okuyacağı formata çevirelim
-    // Örn: [{ month: "Ocak", income: 5000, expense: 2000 }, ...]
     const formattedStats = [];
     const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
@@ -442,12 +561,14 @@ router.get('/analytics/history', auth, async (req, res) => {
       let entry = formattedStats.find(e => e.label === label);
 
       if (!entry) {
-        entry = { label, income: 0, expense: 0, year: item._id.year, month: item._id.month };
+        // 👇 GÜNCELLEME: investment: 0 alanı eklendi
+        entry = { label, income: 0, expense: 0, investment: 0, year: item._id.year, month: item._id.month };
         formattedStats.push(entry);
       }
 
       if (item._id.type === 'income') entry.income = item.total;
       if (item._id.type === 'expense') entry.expense = item.total;
+      if (item._id.type === 'investment') entry.investment = item.total; // 👇 GÜNCELLEME: Yatırım grafiğe dahil edildi
     });
 
     res.json(formattedStats);
@@ -457,7 +578,5 @@ router.get('/analytics/history', auth, async (req, res) => {
     res.status(500).json({ message: 'Analiz verisi oluşturulamadı' });
   }
 });
-
-// module.exports = router;  <-- BU SATIR ZATEN SENDE EN ALTTA VAR, KODU BUNUN ÜSTÜNE YAPIŞTIR.
 
 module.exports = router;
