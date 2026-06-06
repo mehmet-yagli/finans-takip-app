@@ -17,17 +17,11 @@ MERN stack mimarisi üzerine inşa edilen WhaleStreet, kullanıcılarına sadece
 
 ## 📸 Ürün Görselleri
 
-### 🔹 Web Dashboard & Analiz
-Kullanıcının gelir/gider durumunu, net varlığını ve harcama analizlerini grafiklerle sunduğu ana ekran.
-*(Buraya web arayüzünden bir ekran görüntüsü ekleyin)*
+### 📸 Ürün Görselleri
 
-### 🔹 Mobil Deneyim (React Native)
-Finansal verilere her an her yerden ulaşabilmek için tasarlanmış akıcı mobil arayüz.
-*(Buraya Expo uygulamasından bir ekran görüntüsü ekleyin)*
-
-### 🔹 Whale-E: Yapay Zeka Finans Asistanı
-Google Gemini 2.5 Flash motoru ile desteklenen, portföy analizi yapan ve finansal terimleri açıklayan entegre chatbot.
-*(Buraya chat penceresinin bir ekran görüntüsü ekleyin)*
+| Web Dashboard | Mobil Deneyim | AI Asistanı |
+| :---: | :---: | :---: |
+| ![Web](assets/web.png) | ![Mobil](assets/mobile.png) | ![AI](assets/ai.png) |
 
 ---
 
