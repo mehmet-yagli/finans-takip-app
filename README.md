@@ -29,7 +29,7 @@ Google Gemini 2.5 Flash motoru ile desteklenen, portföy analizi yapan ve finans
 
 ## 🚀 Temel Özellikler
 
-* **🤖 AI Finans Asistanı (Whale-E):** Portföy durumunu okuyup kişiselleştirilmiş finansal tavsiyeler veren, "Bileşik faiz nedir?" gibi soruları yanıtlayan akıllı asistan.
+* **🤖 AI Finans Asistanı (Whale-E):** Portföy durumunu okuyup kişiselleştirilmiş finansal tavsiyeler veren, finansal terimleri açıklayan akıllı asistan.
 * **📱 Çoklu Platform Desteği:** Aynı veritabanı ile senkronize çalışan Web (React/Vite) ve Mobil (Expo) uygulamaları.
 * **💰 Dinamik Varlık Yönetimi:** Altın, Döviz, Kripto Para ve Hisse Senetleri için anlık kâr/zarar ve toplam net değer hesaplaması.
 * **📊 Detaylı Bütçe Analizi:** Aylık gelir-gider takibi, kategori bazlı harcama dağılımı (Recharts).
@@ -86,13 +86,6 @@ Bash
    # Telefonunuza 'Expo Go' uygulamasını indirin.
    npx expo start
    # Terminalde çıkan QR kodu telefonunuzdan okutun.
-🔮 Yol Haritası (Gelecek Güncellemeler)
-[ ] Banka API entegrasyonları ile otomatik banka ekstresi okuma.
-
-[ ] Kullanıcılara e-posta ile haftalık/aylık otomatik bütçe raporları gönderimi.
-
-[ ] Portföy hedefleri (Örn: "Ev Peşinatı", "Araba") için gamification (oyunlaştırma) özellikleri.
-
 👨‍💻 Geliştirici: Mehmet Yağlı
 
 💡 Kategori: Finansal Teknoloji (FinTech) & Yapay Zeka
