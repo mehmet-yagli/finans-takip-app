@@ -1,5 +1,9 @@
 # 🐋 WhaleStreet: AI Destekli Finans & Portföy Ekosistemi
 
+## 🌐 Canlı Erişim
+- **Web Uygulaması:** [WhaleStreet'i İncele](https://finans-takip-app-nine.vercel.app/)
+- **Android Uygulaması:** [WhaleStreet.apk İndir](https://github.com/mehmet-yagli/finans-takip-app/releases/latest) (Tıkla ve Kur!)
+
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Stack](https://img.shields.io/badge/Stack-MERN-important.svg)
 ![Mobile](https://img.shields.io/badge/Mobile-React_Native_(Expo)-000000?logo=expo)
@@ -95,3 +99,7 @@ npx expo start
 
 👨‍💻 **Geliştirici:** Mehmet Yağlı  
 💡 **Kategori:** Finansal Teknoloji (FinTech) & Yapay Zeka
+
+---
+## 💡 Geliştirici Notu
+WhaleStreet, sadece bir mezuniyet projesi değil; finansal teknolojilere olan ilgimin ve yapay zekayı günlük problemlerimize (bütçe yönetimi gibi) entegre etme tutkumun bir yansımasıdır. Özellikle Render'ın serverless yapısıyla backend'i canlı tutma ve Gemini 2.5 Flash ile gerçek zamanlı analiz süreçleri, bu projede teknik olarak en çok odaklandığım noktalar olmuştur.
