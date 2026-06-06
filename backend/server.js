@@ -17,6 +17,11 @@ app.get('/', (req, res) => {
   res.json({ message: 'Finans Takip API çalışıyor! 🚀' });
 });
 
+// UptimeRobot için uyanık kalma rotası
+app.get('/ping', (req, res) => {
+  res.status(200).send('WhaleStreet Backend ayakta ve çalışıyor! 🐋');
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));  
 app.use('/api/transactions', require('./routes/transactions'));
