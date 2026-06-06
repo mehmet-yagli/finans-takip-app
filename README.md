@@ -1,104 +1,97 @@
-# 💰 Finans Takip & Portföy Yönetim Sistemi
+# 🐋 WhaleStreet: AI Destekli Finans & Portföy Ekosistemi
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Status](https://img.shields.io/badge/status-Live-success.svg)
-![Stack](https://img.shields.io/badge/MERN-Stack-important.svg)
+![Stack](https://img.shields.io/badge/Stack-MERN-important.svg)
+![Mobile](https://img.shields.io/badge/Mobile-React_Native_(Expo)-000000?logo=expo)
+![AI](https://img.shields.io/badge/AI-Gemini_2.5_Flash-8E75B2)
 
-Kişisel finansal verileri takip etmek, yatırımları yönetmek ve piyasa verilerini anlık izlemek için geliştirilmiş kapsamlı bir **Full-Stack Web Uygulaması**.
+Kişisel finansal verileri takip etmek, yatırımları yönetmek ve finansal okuryazarlığı artırmak için geliştirilmiş, uçtan uca (Web + Mobil + API) çalışan **akıllı bir finans platformudur**. 
 
-🔗 **Canlı Demo:** [https://finans-app-frontend.onrender.com](https://finans-app-frontend.onrender.com)
+MERN stack mimarisi üzerine inşa edilen WhaleStreet, kullanıcılarına sadece bir bütçe defteri sunmakla kalmaz; içerdiği yapay zeka asistanı ile kişiselleştirilmiş bir finans danışmanlığı deneyimi yaşatır.
 
 ---
 
-## 📸 Proje Görselleri
+## 📸 Ürün Görselleri
 
-### 🔹 Dashboard (Genel Bakış)
+### 🔹 Web Dashboard & Analiz
 Kullanıcının gelir/gider durumunu, net varlığını ve harcama analizlerini grafiklerle sunduğu ana ekran.
-![Dashboard Görünümü](screenshots/dashboard-dark.png) 
-*(Buraya image_49ea28.png gibi bir görseli isimlendirip koy)*
+*(Buraya web arayüzünden bir ekran görüntüsü ekleyin)*
 
-### 🔹 Yatırım Portföyü & Kâr/Zarar Analizi
-Kripto, Altın ve Hisse senedi yatırımlarının anlık takibi.
-![Yatırımlar](screenshots/yatirimlar.png)
+### 🔹 Mobil Deneyim (React Native)
+Finansal verilere her an her yerden ulaşabilmek için tasarlanmış akıcı mobil arayüz.
+*(Buraya Expo uygulamasından bir ekran görüntüsü ekleyin)*
 
-### 🔹 Piyasa Merkezi & Yapay Zeka Asistanı
-Canlı döviz kurları, piyasa algısı ve portföy tavsiyesi veren entegre AI Chatbot.
-![Piyasa ve AI](screenshots/piyasa-ai.png)
-
----
-
-## 🚀 Özellikler
-
-* **📊 Detaylı Dashboard:** Aylık gelir-gider takibi, kategori bazlı harcama pasta grafikleri (Recharts).
-* **💰 Varlık Yönetimi:** Altın, Döviz, Kripto Para ve Hisse Senetleri için anlık kâr/zarar hesaplaması.
-* **🤖 AI Finans Asistanı:** Portföy durumuna göre kişiselleştirilmiş finansal tavsiyeler veren yapay zeka entegrasyonu.
-* **🌍 Canlı Piyasa Verileri:** Anlık döviz kurları ve kripto para fiyat takibi.
-* **👥 Topluluk & Forum:** Kullanıcıların finansal konuları tartışabileceği sosyal etkileşim alanı.
-* **📅 Abonelik Takibi:** Netflix, Spotify gibi düzenli ödemelerin takibi ve hatırlatmaları.
-* **🔐 Güvenlik:** JWT (JSON Web Token) tabanlı güvenli kimlik doğrulama sistemi.
-* **🌓 Tema Desteği:** Kullanıcı dostu Dark/Light mod seçeneği.
+### 🔹 Whale-E: Yapay Zeka Finans Asistanı
+Google Gemini 2.5 Flash motoru ile desteklenen, portföy analizi yapan ve finansal terimleri açıklayan entegre chatbot.
+*(Buraya chat penceresinin bir ekran görüntüsü ekleyin)*
 
 ---
 
-## 🛠️ Kullanılan Teknolojiler
+## 🚀 Temel Özellikler
 
-### Frontend (Ön Yüz)
-* **React.js (Vite):** Hızlı ve modern UI geliştirme.
-* **Tailwind CSS:** Responsive ve şık tasarım.
-* **Recharts:** Veri görselleştirme ve grafikler.
-* **Axios:** API istek yönetimi.
-
-### Backend (Arka Plan)
-* **Node.js & Express.js:** RESTful API mimarisi.
-* **MongoDB & Mongoose:** NoSQL veritabanı modellemesi.
-* **JWT (JSON Web Token):** Güvenli oturum yönetimi.
-* **Cors & Dotenv:** Güvenlik ve ortam değişkenleri.
+* **🤖 AI Finans Asistanı (Whale-E):** Portföy durumunu okuyup kişiselleştirilmiş finansal tavsiyeler veren, finansal terimleri açıklayan akıllı asistan.
+* **📱 Çoklu Platform Desteği:** Aynı veritabanı ile senkronize çalışan Web (React/Vite) ve Mobil (Expo) uygulamaları.
+* **💰 Dinamik Varlık Yönetimi:** Altın, Döviz, Kripto Para ve Hisse Senetleri için anlık kâr/zarar ve toplam net değer hesaplaması.
+* **📊 Detaylı Bütçe Analizi:** Aylık gelir-gider takibi, kategori bazlı harcama dağılımı (Recharts).
+* **👥 Topluluk & Sosyal Etkileşim:** Kullanıcıların finansal konuları tartışabileceği entegre forum yapısı.
+* **🔐 Üst Düzey Güvenlik:** JWT tabanlı kimlik doğrulama ve güvenli API rotaları.
 
 ---
 
-## 📦 Kurulum (Local)
+## 🛠️ Mimari ve Teknolojiler
 
-Projeyi yerel bilgisayarınızda çalıştırmak için:
+### Frontend (Web)
+* **React.js (Vite):** Yüksek performanslı ve modern UI geliştirme.
+* **Tailwind CSS & Framer Motion:** Responsive tasarım ve akıcı "Glassmorphism" animasyonlar.
+* **Recharts:** Etkileşimli veri görselleştirme.
 
-1.  **Projeyi Klonlayın**
-    ```bash
-    git clone [https://github.com/KULLANICI_ADIN/finans-takip-app.git](https://github.com/KULLANICI_ADIN/finans-takip-app.git)
-    cd finans-takip-app
-    ```
+### Mobile (Uygulama)
+* **React Native & Expo:** Tek kod tabanı ile iOS ve Android çıktısı alma.
+* **Expo Router:** Modern dosya tabanlı mobil yönlendirme (routing).
 
-2.  **Bağımlılıkları Yükleyin**
-    ```bash
-    # Backend için
-    cd backend
-    npm install
-
-    # Frontend için
-    cd ../frontend
-    npm install
-    ```
-
-3.  **Çevresel Değişkenleri (.env) Ayarlayın**
-    `backend` klasöründe `.env` dosyası oluşturun ve gerekli API anahtarlarını (MONGO_URI, JWT_SECRET vb.) girin.
-
-4.  **Projeyi Başlatın**
-    ```bash
-    # Backend'i başlat
-    cd backend
-    npm start
-
-    # Frontend'i başlat
-    cd frontend
-    npm run dev
-    ```
+### Backend & Yapay Zeka
+* **Node.js & Express.js:** RESTful API mimarisi ve MVC tasarım deseni.
+* **MongoDB & Mongoose:** Esnek NoSQL veritabanı modellemesi.
+* **Google Generative AI:** Gemini 2.5 Flash model entegrasyonu.
 
 ---
 
-## 🔮 Gelecek Güncellemeler
-* [ ] Mobil uygulama (React Native) sürümü.
-* [ ] Banka API entegrasyonları ile otomatik harcama çekme.
-* [ ] E-posta ile haftalık bütçe raporları.
+## 📦 Kurulum ve Çalıştırma (Lokal)
+
+Projeyi kendi bilgisayarınızda test etmek için aşağıdaki adımları izleyebilirsiniz:
+
+**1. Repoyu Klonlayın**
+```bash
+git clone https://github.com/mehmet-yagli/finans-takip-app.git
+cd finans-takip-app
+```
+
+**2. Backend'i Başlatın**
+```bash
+cd backend
+npm install
+# .env.example dosyasını .env olarak kopyalayıp değişkenlerinizi (MongoDB, Gemini vb.) girin.
+npm run dev
+```
+
+**3. Web Arayüzünü Başlatın**
+```bash
+cd ../frontend
+npm install
+# .env.example dosyasını .env olarak kopyalayın.
+npm run dev
+```
+
+**4. Mobil Uygulamayı Başlatın (İsteğe Bağlı)**
+```bash
+cd ../mobile
+npm install
+# Telefonunuza 'Expo Go' uygulamasını indirin.
+npx expo start
+# Terminalde çıkan QR kodu telefonunuzdan okutun.
+```
 
 ---
 
 👨‍💻 **Geliştirici:** Mehmet Yağlı  
-📧 **İletişim:** admin@gmail.com (veya senin gerçek mailin)
+💡 **Kategori:** Finansal Teknoloji (FinTech) & Yapay Zeka
