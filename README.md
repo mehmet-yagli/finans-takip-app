@@ -60,32 +60,38 @@ Google Gemini 2.5 Flash motoru ile desteklenen, portföy analizi yapan ve finans
 
 Projeyi kendi bilgisayarınızda test etmek için aşağıdaki adımları izleyebilirsiniz:
 
-1. **Repoyu Klonlayın**
+**1. Repoyu Klonlayın**
 ```bash
-   git clone [https://github.com/mehmet-yagli/finans-takip-app.git](https://github.com/mehmet-yagli/finans-takip-app.git)
-   cd finans-takip-app
-Backend'i Başlatın
+git clone https://github.com/mehmet-yagli/finans-takip-app.git
+cd finans-takip-app
+```
 
-Bash
-   cd backend
-   npm install
-   # .env.example dosyasını .env olarak kopyalayıp değişkenlerinizi (MongoDB, Gemini vb.) girin.
-   npm run dev
-Web Arayüzünü Başlatın
+**2. Backend'i Başlatın**
+```bash
+cd backend
+npm install
+# .env.example dosyasını .env olarak kopyalayıp değişkenlerinizi (MongoDB, Gemini vb.) girin.
+npm run dev
+```
 
-Bash
-   cd ../frontend
-   npm install
-   # .env.example dosyasını .env olarak kopyalayın.
-   npm run dev
-Mobil Uygulamayı Başlatın (İsteğe Bağlı)
+**3. Web Arayüzünü Başlatın**
+```bash
+cd ../frontend
+npm install
+# .env.example dosyasını .env olarak kopyalayın.
+npm run dev
+```
 
-Bash
-   cd ../mobile
-   npm install
-   # Telefonunuza 'Expo Go' uygulamasını indirin.
-   npx expo start
-   # Terminalde çıkan QR kodu telefonunuzdan okutun.
-👨‍💻 Geliştirici: Mehmet Yağlı
+**4. Mobil Uygulamayı Başlatın (İsteğe Bağlı)**
+```bash
+cd ../mobile
+npm install
+# Telefonunuza 'Expo Go' uygulamasını indirin.
+npx expo start
+# Terminalde çıkan QR kodu telefonunuzdan okutun.
+```
 
-💡 Kategori: Finansal Teknoloji (FinTech) & Yapay Zeka
+---
+
+👨‍💻 **Geliştirici:** Mehmet Yağlı  
+💡 **Kategori:** Finansal Teknoloji (FinTech) & Yapay Zeka
